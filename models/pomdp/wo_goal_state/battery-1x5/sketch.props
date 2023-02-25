@@ -1,2 +1,3 @@
-// LRA < 0.20 [ "charging" ]
-LRA > 0.25 [ "top_left" ]
+//LRA > 0.20 [ "charging" ]
+//LRA > 0.20 [ "exploring" ]
+Pmin=?  [F "empty_battery"]

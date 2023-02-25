@@ -1,7 +1,7 @@
 pomdp
 
 observables
-    o, bat_crit
+    o, pm
 endobservables
 
 const int xmax = 4;
@@ -47,21 +47,32 @@ endmodule
 const int full_bat = 9;
 module battery
 	bat : [0..full_bat] init full_bat; // 0 empty, > 1  operational
-    bat_crit : [0..1] init 0;
 
+ 	[dead_robot] pm=0 -> (bat'=0); // loop when battery empty
 
- 	[dead_robot] bat=0 -> (bat'=0); // loop when battery empty
+	[east] pm>0 -> 1 : (bat'=max(bat-1, 0));
+	[west] pm>0 -> 1 : (bat'=max(bat-1, 0));
+    // todo add power up
+endmodule
 
-	[east] bat!=0 & bat!=5 -> 1 : (bat'=max(bat-1, 0));
-	[east] bat!=0 & bat=5 -> 1 : (bat'=max(bat-1, 0)) & (bat_crit'=1);
-	[west] bat!=0 & bat!=5 -> 1 : (bat'=max(bat-1, 0));
-	[west] bat!=0 & bat=5 -> 1 : (bat'=max(bat-1, 0)) & (bat_crit'=1);
+const int T = 4; // critical mode threshold
+module PM
+    pm : [0..2] init 0;
+    // 0 -> normal
+    // 1 -> critical
+    // 2 -> dead robot
+
+    [west] bat=0  -> (pm'=2);
+    [west] 0<bat & bat<T -> (pm'=1); // go to critical mode
+    [west] bat>=T -> (pm'=0); // go to normal mode
+
+    [east] bat=0  -> (pm'=2);
+    [east] 0<bat & bat<T -> (pm'=1); // go to critical mode
+    [east] bat>=T -> (pm'=0); // go to normal mode
 
 endmodule
 
-
-
-label empty_battery = bat=0;
+label empty_battery = pm=0;
 
 label charging = o=2;
 label exploring = o=3;
