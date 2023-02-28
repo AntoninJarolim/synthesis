@@ -13,33 +13,32 @@ module grid
 	// 2 - can charge states
 	// 3 - exploring
 
-	[] o=0 -> 1/5 : (o'=2) & (x'=0)
-			+ 1/5 : (o'=2) & (x'=1)
-			+ 1/5 : (o'=1) & (x'=2)
-			+ 1/5 : (o'=1) & (x'=3)
-			+ 1/5 : (o'=3) & (x'=4);
 
-
-
+	//[] o=0 ->   1 : (o'=1) & (x'=2);
+	[] o=0 ->   1/10 : (o'=2) & (x'=0)
+		      	+ 1/10 : (o'=2) & (x'=1)
+		        + 1/5 : (o'=1) & (x'=2)
+		    	+ 1/5 : (o'=1) & (x'=3)
+		    	+ 2/5 : (o'=3) & (x'=4);
 
 //    [east] (x!=1) & (x!=3) -> 1 : (x'=min(x+1,xmax));    // normal moving
 //    [east] x=3 -> 1 : (x'=4) & (o'=3);                   // goes to exploring state
 //    [east] x=1 -> 1 : (x'=2) & (o'=1);                   // goes out of charging
-      [east] x=0 -> 1 : (x'=1);
-      [east] x=1 -> 1 : (x'=2) & (o'=1);
-      [east] x=2 -> 1 : (x'=3);
-      [east] x=3 -> 1 : (x'=4)  & (o'=3);
-      [east] x=4 -> 1 : (x'=4);
+	[east] x=0 -> 1 : (x'=1);
+	[east] x=1 -> 1 : (x'=2) & (o'=1);
+	[east] x=2 -> 1 : (x'=3);
+	[east] x=3 -> 1 : (x'=4) & (o'=3);
+	[east] x=4 -> 1 : (x'=4);
 
 
 //    [west] (x!=2) & (x!=4) -> 1 : (x'=max(x-1,0));       // normal moving
 //    [west] (x=4) -> 1 : (x'=3) & (o'=1);                 // out of exploring
 //    [west] (x=2) -> 1 : (x'=1) & (o'=2);                 // to the charging
-      [west] (x=0) -> 1 : (x'=0);
-      [west] (x=1) -> 1 : (x'=0);
-      [west] (x=2) -> 1 : (x'=1) & (o'=2);
-      [west] (x=3) -> 1 : (x'=2);
-      [west] (x=4) -> 1 : (x'=3) & (o'=1);
+	[west] (x=0) -> 1 : (x'=0);
+	[west] (x=1) -> 1 : (x'=0);
+	[west] (x=2) -> 1 : (x'=1) & (o'=2);
+	[west] (x=3) -> 1 : (x'=2);
+	[west] (x=4) -> 1 : (x'=3) & (o'=1);
 
 endmodule
 
@@ -50,25 +49,32 @@ module battery
 
  	[dead_robot] pm=0 -> (bat'=0); // loop when battery empty
 
-	[east] pm>0 -> 1 : (bat'=max(bat-1, 0));
-	[west] pm>0 -> 1 : (bat'=max(bat-1, 0));
-    // todo add power up
+    // discharging
+	[east] pm>0 & o!=2 -> 1 : (bat'=max(bat-1, 0));
+	[west] pm>0 & o!=2 -> 1 : (bat'=max(bat-1, 0));
+	
+	// charging
+	[east] pm>0 & o =2 -> 1 : (bat'=min(bat+1, full_bat));
+	[west] pm>0 & o =2 -> 1 : (bat'=min(bat+1, full_bat));
 endmodule
 
-const int T = 4; // critical mode threshold
+const int Thd = 5; // critical mode threshold
 module PM
-    pm : [0..2] init 0;
-    // 0 -> normal
+    pm : [0..2] init 2;
+    // 0 -> dead robot
     // 1 -> critical
-    // 2 -> dead robot
+    // 2 -> normal
+    // 3 -> full battery
 
-    [west] bat=0  -> (pm'=2);
-    [west] 0<bat & bat<T -> (pm'=1); // go to critical mode
-    [west] bat>=T -> (pm'=0); // go to normal mode
+    [west] bat=0  -> (pm'=0);
+    [west] 0<bat & bat<Thd -> (pm'=1); // go to critical mode
+    [west] Thd<=bat -> (pm'=2); // go to normal mode  & bat < full_bat
+    //[west] bat=full_bat  -> (pm'=3); // go to full battery
 
-    [east] bat=0  -> (pm'=2);
-    [east] 0<bat & bat<T -> (pm'=1); // go to critical mode
-    [east] bat>=T -> (pm'=0); // go to normal mode
+    [east] bat=0  -> (pm'=0);
+    [east] 0<bat & bat<Thd -> (pm'=1); // go to critical mode
+    [east] Thd<=bat -> (pm'=2); // go to normal mode
+    //[east] bat=full_bat  -> (pm'=3); // go to full battery
 
 endmodule
 
@@ -77,3 +83,4 @@ label empty_battery = pm=0;
 label charging = o=2;
 label exploring = o=3;
 label top_left = x=0;
+

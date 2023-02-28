@@ -1,3 +1,24 @@
-//LRA > 0.20 [ "charging" ]
-//LRA > 0.20 [ "exploring" ]
-Pmin=?  [F "empty_battery"]
+//P<=0  [F "top_left" ]
+//LRAmin=? [ "exploring" ]
+//LRA < 0.01 [ "empty_battery" ]
+
+P <=0.65  [F "empty_battery"]
+//Pmin=? [F "empty_battery"]
+
+//LRA > 0.01 [ "exploring" ]
+//LRA > 0.8 [ "charging" ]
+//LRA > 0.5 [ "exploring" ]
+//LRA < 1 [ "charging" ]
+//LRA > 0 [ "exploring" ]
+LRAmax=? [ "exploring" ]
+
+// 0 - initial observation   (o)
+// 1 - in the grid
+// 2 - can charge states
+// 3 - exploring
+
+// 0 -> dead robot   (pm)
+// 1 -> critical
+// 2 -> normal
+// 3 -> full battery
+
