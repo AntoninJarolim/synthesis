@@ -1,0 +1,8 @@
+//R{"penalty"}min=? [F goal]
+//R{"penalty"}min=? [F goal]
+
+//Pmax=? [F goal]
+//LRA<.7 [ start ]
+LRA>.3 [ start ]
+
+//LRAmax=? [ goal ]
