@@ -1,0 +1,87 @@
+pomdp
+
+observables
+    o, pm
+endobservables
+
+const int xmax = 4;
+module grid
+    x : [0..xmax] init 2;
+	o : [0..3] init 0; // observables
+	// 0 - initial observation
+	// 1 - in the grid
+	// 2 - can charge states
+	// 3 - exploring
+
+
+	//[] o=0 ->   1 : (o'=1) & (x'=2);
+	[start] o=0 ->   1/5 : (o'=2) & (x'=0)
+		      	+ 1/5 : (o'=2) & (x'=1)
+		        + 1/5 : (o'=1) & (x'=2)
+		    	+ 1/5 : (o'=1) & (x'=3)
+		    	+ 1/5 : (o'=3) & (x'=4);
+
+//    [east] (x!=1) & (x!=3) -> 1 : (x'=min(x+1,xmax));    // normal moving
+//    [east] x=3 -> 1 : (x'=4) & (o'=3);                   // goes to exploring state
+//    [east] x=1 -> 1 : (x'=2) & (o'=1);                   // goes out of charging
+	[east] x=0 -> 1 : (x'=1);
+	[east] x=1 -> 1 : (x'=2) & (o'=1);
+	[east] x=2 -> 1 : (x'=3);
+	[east] x=3 -> 1 : (x'=4) & (o'=3);
+	[east] x=4 -> 1 : (x'=4);
+
+
+//    [west] (x!=2) & (x!=4) -> 1 : (x'=max(x-1,0));       // normal moving
+//    [west] (x=4) -> 1 : (x'=3) & (o'=1);                 // out of exploring
+//    [west] (x=2) -> 1 : (x'=1) & (o'=2);                 // to the charging
+	[west] (x=0) -> 1 : (x'=0);
+	[west] (x=1) -> 1 : (x'=0);
+	[west] (x=2) -> 1 : (x'=1) & (o'=2);
+	[west] (x=3) -> 1 : (x'=2);
+	[west] (x=4) -> 1 : (x'=3) & (o'=1);
+
+endmodule
+
+
+const int full_bat = 9;
+module battery
+	bat : [0..full_bat] init full_bat; // 0 empty, > 1 operational
+
+ 	[dead_robot] pm=0 -> (bat'=0); // loop when battery empty
+
+    // discharging
+	[east] pm>0 & o!=2 -> 1 : (bat'=max(bat-1, 0));
+	[west] pm>0 & o!=2 -> 1 : (bat'=max(bat-1, 0));
+	
+	// charging
+	[east] pm>0 & o =2 -> 1 : (bat'=min(bat+1, full_bat));
+	[west] pm>0 & o =2 -> 1 : (bat'=min(bat+1, full_bat));
+endmodule
+
+const int Thd = 4; // critical mode threshold
+const max_pm = 3;
+module PM
+    pm : [0..max_pm] init max_pm;
+    // 0 -> dead robot
+    // 1 -> critical
+    // 2 -> normal
+    // 3 -> full battery
+
+    [west] o!=0 &   bat=0  -> (pm'=0);
+    [west] o!=0 &   0<bat & bat<Thd -> (pm'=1); // go to critical mode
+    [west] o!=0 &   Thd<=bat & bat < full_bat -> (pm'=2); // go to normal mode
+    [west] o!=0 &   bat=full_bat -> (pm'=3); // go to full battery
+
+    [east] o!=0 &   bat=0  -> (pm'=0);
+    [east] o!=0 &   0<bat & bat<Thd -> (pm'=1); // go to critical mode
+    [east] o!=0 &   Thd<=bat & bat < full_bat -> (pm'=2); // go to normal mode
+    [east] o!=0 &   bat=full_bat -> (pm'=3); // go to full battery
+
+endmodule
+
+label empty_battery = pm=0;
+
+label charging = o=2;
+label exploring = o=3;
+label top_left = x=0;
+

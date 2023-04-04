@@ -1,0 +1,57 @@
+pomdp
+// 2 x x x
+// 1 h h x
+// 0 x x x
+//   0 1 2
+
+// updates of coordinates (if possible)
+formula yu = u ? (y+1) : y;
+formula xr = r ? (x+1) : x;
+formula yd = d ? (y-1) : y;
+formula xl = l ? (x-1) : x;
+
+formula u = y<2;
+formula r = x<2;
+formula d = y>0;
+formula l = x>0;
+
+formula in_hole = x<2 & y=1;
+label "in_hole" = x<2 & y=1;
+
+module M1
+
+    x : [0..2] init 1;
+    y : [0..2] init 0;
+
+    [up]    !in_hole -> 0.9: (y'=yu) + 0.1: true;
+    [right] !in_hole -> 0.9: (x'=xr) + 0.1: true;
+    [down]  !in_hole -> 0.9: (y'=yd) + 0.1: true;
+    [left]  !in_hole -> 0.9: (x'=xl) + 0.1: true;
+
+    [dead]   in_hole -> true;
+endmodule
+
+formula flip = z=2 ? 0 : z+1;
+formula lambda = 0.05;
+module M2
+    z : [0..2] init 0;
+
+    [up] true -> lambda : (z'=flip) + 1-lambda : true;
+    [right] true -> lambda : (z'=flip) + 1-lambda : true;
+    [down] true -> lambda : (z'=flip) + 1-lambda : true;
+    [left] true -> lambda : (z'=flip) + 1-lambda : true;
+
+endmodule
+
+
+// robot sees holes with sensors
+observable "hole_up" = x<2 & y=0;
+observable "hole_left" = x=2 & y=1;
+observable "hole_down"= x<2 & y=2;
+observable "in_hole" = x<2 & y=1;
+observable "crying"= z;
+// observable "goal1" = x=1 & y=0;
+// observable "goal2" = x=1 & y=2;
+
+label goal1 = x=0 & y=0;
+label goal2 = x=0 & y=2;
