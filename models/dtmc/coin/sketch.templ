@@ -1,34 +1,21 @@
 dtmc
 
-const double p = 0.8;
+module die
 
-hole int s0h in {3,4};
-hole int s0t in {3,4};
-hole int s3h in {0,1,2};
-hole int s3t in {0,1,2};
+	// local state
+	s : [0..7] init 0;
+	// value of the die
+	d : [0..6] init 0;
 
-//hole int s0h in {0,1,2,3,4};
-//hole int s0t in {0,1,2,3,4};
-//hole int s3h in {0,1,2,3,4};
-//hole int s3t in {0,1,2,3,4};
-hole int s4h in {0,1,2,3,4};
-hole int s4t in {0,1,2,3,4};
+	[] s=0 -> 0.5 : (s'=1) + 0.5 : (s'=2);
+	[] s=1 -> 0.5 : (s'=3) + 0.5 : (s'=4);
+	[] s=2 -> 0.5 : (s'=5) + 0.5 : (s'=6);
+	[] s=3 -> 0.5 : (s'=1) + 0.5 : (s'=7) & (d'=1);
+	[] s=4 -> 0.5 : (s'=7) & (d'=2) + 0.5 : (s'=7) & (d'=3);
+	[] s=5 -> 0.5 : (s'=7) & (d'=4) + 0.5 : (s'=7) & (d'=5);
+	[] s=6 -> 0.5 : (s'=2) + 0.5 : (s'=7) & (d'=6);
+	[] s=7 -> (s'=0) & (d'=0);
 
-// hole double p in {0.5,0.6};
-
-module dice
-    s : [0..4] init 0;
-    [] s=1 | s=2 -> true;
-    [] s=0 -> p : (s' = s0h) + 1-p : (s' = s0t);
-    [] s=3 -> p : (s' = s3h) + 1-p : (s' = s3t);
-    [] s=4 -> p : (s' = s4h) + 1-p : (s' = s4t);
 endmodule
 
-formula heads = (s = 2);
-formula tails = (s = 1);
-
-formula finished = heads | tails;
-
-rewards "steps"
-    true : 1;
-endrewards
+label result_3= s=7 & d=3;

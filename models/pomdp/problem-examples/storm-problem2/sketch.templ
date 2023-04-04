@@ -5,6 +5,8 @@ formula goal = x=2;
 observable "o0" = x=0 | x=1;
 observable "goal" = goal;
 
+formula start = x=2;
+
 module test
 
     x : [0..2] init 0;
@@ -15,7 +17,7 @@ module test
     [a]   x=1 -> 1: (x'=1);
     [b]   x=1 -> 1: (x'=2);
 
-    []    x=2 -> 1: (x'=2);
+    []    x=2 -> 1: (x'=0);
 
 
 endmodule

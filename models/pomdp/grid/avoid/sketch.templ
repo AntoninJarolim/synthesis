@@ -60,7 +60,7 @@ module grid
 	[south] o=1 & x=1 & y=2 -> (1-sl): (y'=1) & (o'=3) + sl: (x'=x)&(y'=y)&(o'=o); //reached bad state	
 	
 	// reached target
-	[done] o=2 -> true;
+	[done] o=2 -> 1 : (o'=0);
 	
 	//reached bad state
 	[bad] o=3 -> true;
@@ -78,3 +78,4 @@ endrewards
 // target observation
 label "goal" = o=2;
 label "bad" = o=3;
+label "huh" = x=3;
