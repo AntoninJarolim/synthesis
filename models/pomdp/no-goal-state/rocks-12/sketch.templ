@@ -75,12 +75,7 @@ module robot
     [south]  true -> (1-slippery): (y'=min(y+1,yMx)) + slippery: (y'=min(y,yMx));
     [north]  true -> (1-slippery): (y'=max(y-1,yMIN)) + slippery: (y'=max(y,yMIN));
 
-    [restart] true
-            -> 0.2: (x'=0) & (y'=0)
-            + 0.2: (x'=1) & (y'=1)
-            + 0.2: (x'=2) & (y'=2)
-            + 0.2: (x'=1) & (y'=3)
-            + 0.2: (x'=3) & (y'=4);
+    [restart] true -> 1: (x'=0) & (y'=0);
 
 endmodule
 
@@ -98,4 +93,4 @@ rewards "cost"
 endrewards
 
 label "goal" = finish;
-label "rockposition" = (r1x = x & r1y = y) | (r2x = x & r2y = y);// | (r3x = x & r3y = y);
+label "rockposition" = (r1x = x & r1y = y) | (r2x = x & r2y = y) | (r3x = x & r3y = y);

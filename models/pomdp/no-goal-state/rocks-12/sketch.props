@@ -1,2 +1,2 @@
 //R{"cost"}min=? [F "goal"];
-LRAmax=? ["rockposition"]
+LRAmax=? ["goal"]

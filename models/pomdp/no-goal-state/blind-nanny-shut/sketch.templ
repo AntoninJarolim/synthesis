@@ -1,0 +1,81 @@
+pomdp
+// 2 x x x
+// 1 h h x
+// 0 x x x
+//   0 1 2
+
+// can go this direction
+formula u = y<2;
+formula r = x<2;
+formula d = y>0;
+formula l = x>0;
+
+// updates of coordinates (if possible)
+formula yu = u ? (y+1) : y;
+formula xr = r ? (x+1) : x;
+formula yd = d ? (y-1) : y;
+formula xl = l ? (x-1) : x;
+
+formula in_hole = x<2 & y=1;
+
+module nanny
+
+    x : [0..2] init 1;
+    y : [0..2] init 0;
+
+    [up]    !in_hole -> 0.9: (y'=yu) + 0.1: true;
+    [right] !in_hole -> 0.9: (x'=xr) + 0.1: true;
+    [down]  !in_hole -> 0.9: (y'=yd) + 0.1: true;
+    [left]  !in_hole -> 0.9: (x'=xl) + 0.1: true;
+
+    [dead]   in_hole -> true;
+endmodule
+
+
+formula cry_rate=0.04;
+formula silence_rate= 1 - (2*cry_rate);
+formula shut_upper_child= x=1&y=2;
+formula shut_down_child= x=1&y=0;
+module baby_cries
+    u_crying : bool init false; // child at position 0, 2 is crying (up)
+    d_crying : bool init false; // child at position 0, 0 is crying (down)
+
+    [up]    true -> cry_rate : (u_crying'=true)
+                  + cry_rate : (d_crying'=true)
+                  + silence_rate : true;
+    [right] true -> cry_rate : (u_crying'=true)
+                  + cry_rate : (d_crying'=true)
+                  + silence_rate : true;
+    [down]  true -> cry_rate : (u_crying'=true)
+                  + cry_rate : (d_crying'=true)
+                  + silence_rate : true;
+    [left] !shut_down_child & !shut_upper_child
+                 -> cry_rate : (u_crying'=true)
+                  + cry_rate : (d_crying'=true)
+                  + silence_rate : true;
+
+    [left] shut_upper_child -> 1 : (u_crying'=false);
+    [left] shut_down_child -> 1 : (d_crying'=false);
+
+    [dead] true -> 1 : (u_crying'=true) & (d_crying'=true);
+endmodule
+
+
+// nanny sees holes with sensors
+//observable "hole_up" = x<2 & y=0;
+//observable "hole_left" = x=2 & y=1;
+//observable "hole_down"= x<2 & y=2;
+observable "in_hole" = x<2 & y=1;
+
+observable "u_crying"= u_crying;
+observable "d_crying"= d_crying;
+
+formula both_crying = d_crying & u_crying;
+
+label "in_hole" = x<2 & y=1;
+label someone_cries = d_crying | u_crying;
+label both_crying = both_crying;
+label one_crying = (d_crying | u_crying) & !both_crying;
+
+
+
