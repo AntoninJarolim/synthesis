@@ -1,0 +1,39 @@
+// Knuth's model of a fair die using only fair coins
+dtmc
+
+const double p=0.50;
+const double q=0.50;
+
+hole int x2 in {1,2};
+hole int x1 in {1,2};
+//hole int x3 in {1,2,3,4,5,6,7};
+//hole int x4 in {1,2,3,4,5,6,7};
+//hole int x5 in {1,2,3,4,5,6,7};
+//hole int x6 in {1,2,3,4,5,6,7};
+
+module die
+	// local state
+	s : [0..6] init 0;
+	// value of the dice
+	d : [0..6] init 0;
+
+	[] s=0 -> p : (s'=x1) & (d'=0) + 1-p : (s'=x2) & (d'=0);
+	[] s=1 -> q : (s'=3) + 1-q : (s'=4);
+	[] s=2 -> q : (s'=5) + 1-q : (s'=6);
+	[] s=3 -> p : (s'=1) + 1-p : (s'=0) & (d'=1);
+	[] s=4 -> p : (s'=0) & (d'=3) + 1-p : (s'=0) & (d'=2);
+	[] s=5 -> p : (s'=2) + 1-p : (s'=0) & (d'=4);
+	[] s=6 -> p : (s'=0) & (d'=6) + 1-p : (s'=0) & (d'=5);
+
+endmodule
+
+rewards "coin_flips"
+	true : 1;
+endrewards
+
+label "one" = d=1;
+label "two" = d=2;
+label "three" = d=3;
+label "four" = d=4;
+label "five" = d=5;
+label "six" = d=6;

@@ -1,0 +1,91 @@
+// Tohle funguje -> vysledek 1.0
+// P>0.01 [F "goal"]
+
+// Taky funguje -> optimal 0.0
+// Pmin=? [F "start"]
+
+// ocekaval bych 1.0, ale vysledek -> feasible: no
+// Pmin=? [F "goal"]
+// P>0.01 [F "goal"]
+
+// Podobně pro LRA, kde vysledek neni 1.0
+
+// Tohle funguje -> vysledek 0.33333
+// LRA>0.01 [ "goal" ]
+
+// Taky funguje -> optimal 0.0
+// LRAmin=? [ "goal" ]
+
+// ocekaval bych 0.33333, ale vysledek -> feasible: no
+// LRAmin=? [ "goal" ]
+// LRA>0.01 [ "goal" ]
+
+// R{"penalty"}min=? [F "goal"]
+
+//P>0.01 [F "goal"]
+
+////////////// memory 4 //////////////////////
+// todo: stats for one b one
+//LRA>0.2 [ "goal" ] // 0.95,  4672, 1.39
+//LRA>0.25 [ "goal" ] // 0.92, 4536, 1.4
+//LRA>0.3 [ "goal" ]  // 0.73, 3626 1.47
+//LRA>0.35 [ "goal" ]  // 0.12,  352 1.41
+
+//LRA>0.5 [ "goal" ] // 1
+//LRA>0.25 [ "goal" ]
+
+
+//LRA<0.2 [ "goal" ]  //  1.01, 4983, 1.39
+//LRA<0.25 [ "goal" ] //  0.98, 4847, 1.44
+//LRA<0.3 [ "goal" ]  //  0.84, 3991, 1.39
+//LRA<0.35 [ "goal" ] //  0.16, 755 , 1.42
+
+
+////////////// memory 5 //////////////////////
+//LRA>0.2 [ "goal" ]  //  27.79, 124904, 46.61
+//LRA>0.25 [ "goal" ] //  25.73, 117630, 46.14
+//LRA>0.3 [ "goal" ]  //  19.52, 88014 , 45.21
+//LRA>0.35 [ "goal" ] //  1.73 , 7918  , 46.04
+
+//LRA<0.2 [ "goal" ]   // 28.5 , 132131, 46.56
+//LRA<0.25 [ "goal" ]  // 27.14, 125419, 47.49
+//LRA<0.3 [ "goal" ]   // 21.41, 98855 , 46.62
+LRA<0.2 [ "goal" ]    // 4.28 , 19473 , 47.84
+
+LRA:
+unfeasible faster:
+    Robot-battery memory - liveliness
+    Robot-battery-stay - liveliness
+    Storm-problem2 - liveliness
+feasible faster:
+
+P:
+unfeasible faster:
+feasible faster:
+    Robot-battery-stay - safety
+
+
+
+Robot-battery memory - liveliness
+    finds solution at least in unfeasible
+    cannot compare speedup
+
+Robot-battery-stay:
+  LRA:
+    37x liveliness up to 180x
+    18x safety up to 33x
+  P:
+    37x liveliness
+    37x safety
+
+Storm-problem2:
+    1.4x up to 20x liveliness
+    1.4x up to 6x safety
+
+Blind-nanny:
+  LRA:
+    6x up to 0.28x liveliness
+  P:
+    6x up to 21x liveliness
+    2.8x up to 3.5x safety
+

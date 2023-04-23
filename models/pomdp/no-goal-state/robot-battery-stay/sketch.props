@@ -1,0 +1,5 @@
+//P < 0.25 [ "exploring" ]
+//P > 0.95 [F "exploring" ]
+//LRA > 0.95 [ "exploring" ]
+LRAmax=? ["exploring"]
+

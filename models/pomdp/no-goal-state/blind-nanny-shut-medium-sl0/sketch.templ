@@ -1,13 +1,12 @@
 pomdp
-// 1 h x
-// 0 x x
-//   0 1
-const maxX = 1;
-const maxY = 1;
+// 2 h h x
+// 1 h h x
+// 0 x x x
+//   0 1 2
 
 // can go this direction
-formula u = y<maxY;
-formula r = x<maxX;
+formula u = y<2;
+formula r = x<2;
 formula d = y>0;
 formula l = x>0;
 
@@ -17,17 +16,17 @@ formula xr = r ? (x+1) : x;
 formula yd = d ? (y-1) : y;
 formula xl = l ? (x-1) : x;
 
-formula in_hole = x=0 & y=1;
-
+formula in_hole = x<2 & y>0;
+formula slippery= 0;
 module nanny
 
-    x : [0..maxX] init 0;
-    y : [0..maxY] init 0;
+    x : [0..2] init 1;
+    y : [0..2] init 0;
 
-    [up]    !in_hole -> 1: (y'=yu);
-    [right] !in_hole -> 1: (x'=xr);
-    [down]  !in_hole -> 1: (y'=yd);
-    [left]  !in_hole -> 1: (x'=xl);
+    [up]    !in_hole -> (1-slippery) : (y'=yu) + slippery: true;
+    [right] !in_hole -> (1-slippery) : (x'=xr) + slippery: true;
+    [down]  !in_hole -> (1-slippery) : (y'=yd) + slippery: true;
+    [left]  !in_hole -> (1-slippery) : (x'=xl) + slippery: true;
 
     [dead]   in_hole -> true;
 endmodule
@@ -35,12 +34,15 @@ endmodule
 
 formula cry_rate=0.04;
 formula silence_rate= 1 - (2*cry_rate);
-formula middle_point= x=1&y=0;
+formula shut_upper_child= x=2&y=1;
+formula shut_down_child= x=1&y=0;
 module baby_cries
-    u_crying : bool init false; // child at position 0 2 is crying (up)
-    d_crying : bool init false; // child at position 0 0 is crying (down)
+    u_crying : bool init false; // child at position 0
+2 is crying (up)
+    d_crying : bool init false; // child at position 0
+0 is crying (down)
 
-    [up]    !middle_point
+    [up]    !shut_upper_child
                  -> cry_rate : (u_crying'=true)
                   + cry_rate : (d_crying'=true)
                   + silence_rate : true;
@@ -50,13 +52,13 @@ module baby_cries
     [down]  true -> cry_rate : (u_crying'=true)
                   + cry_rate : (d_crying'=true)
                   + silence_rate : true;
-    [left] !middle_point
+    [left] !shut_down_child
                  -> cry_rate : (u_crying'=true)
                   + cry_rate : (d_crying'=true)
                   + silence_rate : true;
 
-    [up]  middle_point -> 1 : (u_crying'=false);
-    [left] middle_point -> 1 : (d_crying'=false);
+    [up]  shut_upper_child -> 1 : (u_crying'=false);
+    [left] shut_down_child -> 1 : (d_crying'=false);
 
     [dead] true -> 1 : (u_crying'=true) & (d_crying'=true);
 endmodule
@@ -77,9 +79,26 @@ observable "in_hole" = in_hole;
 
 formula both_crying = d_crying & u_crying;
 
-label "in_hole" = in_hole;
+label "in_hole" = x<2 & y=1;
 label someone_cries = d_crying | u_crying;
 label both_crying = both_crying;
 label one_crying = (d_crying | u_crying) & !both_crying;
 
 
+
+A([u_crying=1],0)={'up'}
+A([u_crying=1],1)={'up'}
+M([u_crying=1],0)=1
+M([u_crying=1],1)=0
+A([d_crying=1 & u_crying=1],0)={'up'}
+A([d_crying=1 & u_crying=1],1)={'up'}
+M([d_crying=1 & u_crying=1],0)=0
+M([d_crying=1 & u_crying=1],1)=0
+A([],0)={'right'}
+A([],1)={'down'}
+M([],0)=0
+M([],1)=0
+A([d_crying=1],0)={'left'}
+A([d_crying=1],1)={'up'}
+M([d_crying=1],0)=0
+M([d_crying=1],1)=0

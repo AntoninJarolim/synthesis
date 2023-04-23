@@ -1,5 +1,5 @@
 pomdp
-// 2 x x x
+// 2 h h x
 // 1 h h x
 // 0 x x x
 //   0 1 2
@@ -16,17 +16,17 @@ formula xr = r ? (x+1) : x;
 formula yd = d ? (y-1) : y;
 formula xl = l ? (x-1) : x;
 
-formula in_hole = x<2 & y=1;
-
+formula in_hole = x<2 & y>0;
+formula slippery= 0.1;
 module nanny
 
     x : [0..2] init 1;
     y : [0..2] init 0;
 
-    [up]    !in_hole -> 0.9: (y'=yu) + 0.1: true;
-    [right] !in_hole -> 0.9: (x'=xr) + 0.1: true;
-    [down]  !in_hole -> 0.9: (y'=yd) + 0.1: true;
-    [left]  !in_hole -> 0.9: (x'=xl) + 0.1: true;
+    [up]    !in_hole -> (1-slippery) : (y'=yu) + slippery: true;
+    [right] !in_hole -> (1-slippery) : (x'=xr) + slippery: true;
+    [down]  !in_hole -> (1-slippery) : (y'=yd) + slippery: true;
+    [left]  !in_hole -> (1-slippery) : (x'=xl) + slippery: true;
 
     [dead]   in_hole -> true;
 endmodule
@@ -34,13 +34,14 @@ endmodule
 
 formula cry_rate=0.04;
 formula silence_rate= 1 - (2*cry_rate);
-formula shut_upper_child= x=1&y=2;
+formula shut_upper_child= x=2&y=1;
 formula shut_down_child= x=1&y=0;
 module baby_cries
     u_crying : bool init false; // child at position 0, 2 is crying (up)
     d_crying : bool init false; // child at position 0, 0 is crying (down)
 
-    [up]    true -> cry_rate : (u_crying'=true)
+    [up]    !shut_upper_child
+                 -> cry_rate : (u_crying'=true)
                   + cry_rate : (d_crying'=true)
                   + silence_rate : true;
     [right] true -> cry_rate : (u_crying'=true)
@@ -49,12 +50,12 @@ module baby_cries
     [down]  true -> cry_rate : (u_crying'=true)
                   + cry_rate : (d_crying'=true)
                   + silence_rate : true;
-    [left] !shut_down_child & !shut_upper_child
+    [left] !shut_down_child
                  -> cry_rate : (u_crying'=true)
                   + cry_rate : (d_crying'=true)
                   + silence_rate : true;
 
-    [left] shut_upper_child -> 1 : (u_crying'=false);
+    [up]  shut_upper_child -> 1 : (u_crying'=false);
     [left] shut_down_child -> 1 : (d_crying'=false);
 
     [dead] true -> 1 : (u_crying'=true) & (d_crying'=true);
@@ -62,13 +63,17 @@ endmodule
 
 
 // nanny sees holes with sensors
-observable "hole_up" = x<2 & y=0;
-observable "hole_left" = x=2 & y=1;
-observable "hole_down"= x<2 & y=2;
-observable "in_hole" = x<2 & y=1;
+//observable "hole_up" = x<2 & y=0;
+//observable "hole_left" = x=2 & y=1;
+//observable "hole_down"= x<2 & y=2;
 
-observable "u_crying"= u_crying;
+//observable "d_position"= x=0 & y=0;
+//observable "u_position"= x=0 & y=2;
+
 observable "d_crying"= d_crying;
+observable "u_crying"= u_crying;
+
+observable "in_hole" = in_hole;
 
 formula both_crying = d_crying & u_crying;
 

@@ -1,0 +1,3 @@
+//LRAmax=? [ "goal2" ]
+LRA > 0.65 ["goal1"]
+LRA > 0.65 ["goal2"]
