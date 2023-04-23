@@ -1,6 +1,1 @@
-// minimum probability guess correctly which cryptographer paid
-//"minimum": Pmin=? [ F correct=1 ];
-// maximum probability guess correctly which cryptographer paid
-//"maximum": Pmax=? [ F correct=1 ];
-LRAmax=? ["goal"]
-// LRA<0.035 ["goal"]
+P > 0.01 [F "goal"] 

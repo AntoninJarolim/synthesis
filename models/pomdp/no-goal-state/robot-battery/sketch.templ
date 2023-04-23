@@ -68,7 +68,7 @@ module PM
     // 2 -> normal
     // 3 -> full battery
 
-    [west] o! =0 &   bat=0  -> (pm'=0);
+    [west] o!=0 &   bat=0  -> (pm'=0);
     [west] o!=0 &   0<bat & bat<Thd -> (pm'=1); // go to critical mode
     [west] o!=0 &   Thd<=bat & bat < full_bat -> (pm'=2); // go to normal mode
     [west] o!=0 &   bat=full_bat -> (pm'=3); // go to full battery

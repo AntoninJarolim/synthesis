@@ -3,4 +3,4 @@
 //R{"steps"}min=? [ F (goal | bad) ]
 
 //R{"steps"}min=? [ F goal ]
-LRAmax=? ["goal"]
+P > 0.01 [F "goal"]
