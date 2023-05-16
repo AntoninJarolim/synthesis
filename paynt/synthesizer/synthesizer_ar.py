@@ -1,3 +1,10 @@
+
+import datetime
+import functools
+import time
+
+import stormpy
+
 from .synthesizer import Synthesizer
 
 import logging
@@ -5,19 +12,34 @@ logger = logging.getLogger(__name__)
 
 
 class SynthesizerAR(Synthesizer):
+    stats_file_name = "statistic.csv"
+    enabled_families_timing = False
+
+    def __init__(self, quotient):
+        super().__init__(quotient)
+        self.stats_file = open(SynthesizerAR.stats_file_name, "w")
+        self.verify_family = self.timed_verify_family if SynthesizerAR.enabled_families_timing else self.verify_family_clean
+
+    def __del__(self):
+        self.stats_file.close()
 
     @property
     def method_name(self):
         return "AR"
 
-    
-    def verify_family(self, family):
+    def verify_family_clean(self, family):
         self.quotient.build(family)
         self.stat.iteration_mdp(family.mdp.states)
         res = family.mdp.check_specification(self.quotient.specification, property_indices = family.property_indices, short_evaluation = True)
         family.analysis_result = res
 
-    
+    def timed_verify_family(self, family):
+        time_before = time.perf_counter()
+        self.verify_family_clean(family)
+        time_after = time.perf_counter()
+        analysis_time = time_after - time_before
+        self.stats_file.write(f"{family.size},{family.mdp.states},{analysis_time}\n")
+
     def analyze_family(self, family):
         """
         :return (1) family feasibility (True/False/None)

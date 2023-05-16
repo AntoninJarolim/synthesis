@@ -111,10 +111,12 @@ def setup_logger(log_path = None):
     type=click.Choice(["storm", "paynt", "cutoff"]),
     show_default=True,
     help="specify memory unfold strategy. Can only be used together with --storm-pomdp flag")
-
+@click.option("--time-family-analysis", is_flag=True, default=False,
+              help="tracks the analysis time of each family using AR method. Saves statistics to 'statistics.csv' file (change with --stats-name) in format 'family_size,quotient_mdp_size,analysis_time'.")
+@click.option("--ar-log-name", default="statistics.csv", show_default=True,
+              help="name of the statistics file to generate. Can only by used together with --time-family-analysis flag.")
 #@click.option("--storm-parallel", is_flag=True, default=False,
 #    help="run storm analysis in parallel (can only be used together with --storm-pomdp-analysis flag)")
-
 @click.option(
     "--ce-generator",
     default="storm",
@@ -138,7 +140,8 @@ def paynt(
         use_storm_cutoffs, unfold_strategy_storm,
         ce_generator,
         pomcp,
-        profiling
+        profiling,
+        time_family_analysis, ar_log_name
 ):
     logger.info("This is Paynt version {}.".format(version()))
 
@@ -190,6 +193,9 @@ def paynt(
     elif method == "onebyone":
         synthesizer = SynthesizerOneByOne(quotient)
     elif method == "ar":
+        if time_family_analysis:
+            SynthesizerAR.enabled_families_timing = time_family_analysis
+            SynthesizerAR.stats_file_name = ar_log_name
         synthesizer = SynthesizerAR(quotient)
     elif method == "cegis":
         synthesizer = SynthesizerCEGIS(quotient)
