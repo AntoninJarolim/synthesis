@@ -29,7 +29,7 @@ class MarkovChain:
         stormpy.synthesis.set_precision_native(se.native_solver_environment, Property.mc_precision)
         stormpy.synthesis.set_precision_minmax(se.minmax_solver_environment, Property.mc_precision)
 
-        se.set_linear_equation_solver_type(stormpy.EquationSolverType.native)
+        # se.set_linear_equation_solver_type(stormpy.EquationSolverType.native)
         # se.set_linear_equation_solver_type(stormpy.EquationSolverType.gmmxx)
         # se.set_linear_equation_solver_type(stormpy.EquationSolverType.eigen)
 
